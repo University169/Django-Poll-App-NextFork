@@ -4,8 +4,34 @@ from django.utils import timezone
 import secrets
 
 
+# добавил сам
+class Questionnaire(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    text = models.TextField()
+    pub_date = models.DateTimeField(default=timezone.now)
+    active = models.BooleanField(default=True)
+
+    def user_can_vote(self, user):
+        """
+        Return False if user already voted
+        """
+        user_votes = user.vote_set.all()
+        qs = user_votes.filter(poll=self)
+        if qs.exists():
+            return False
+        return True
+
+    @property
+    def get_vote_count(self):
+        return self.vote_set.count()
+
+    def __str__(self):
+        return self.text
+
+
 class Poll(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    # questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)
     text = models.TextField()
     pub_date = models.DateTimeField(default=timezone.now)
     active = models.BooleanField(default=True)
