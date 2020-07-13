@@ -4,7 +4,8 @@ from django.core.paginator import Paginator
 from django.db.models import Count
 from django.contrib import messages
 from .models import Poll, Choice, Vote
-from .forms import PollAddForm, EditPollForm, ChoiceAddForm
+from .forms import PollAddForm, EditPollForm, ChoiceAddForm, QuestionnaireAddForm
+import datetime
 
 
 @login_required()
@@ -54,6 +55,32 @@ def list_by_user(request):
 
 
 @login_required()
+def questionnaire_add(request):
+    if request.user.has_perm('polls.add_questionnaire'):
+        if request.method == 'POST':
+            form = QuestionnaireAddForm(request.POST)
+            if form.is_valid:
+                questionnaire = form.save(commit=False)
+                questionnaire.owner = request.user
+                questionnaire.save()
+                new_poll1 = Poll(owner=request.user,
+                    text=form.cleaned_data['poll1'], pub_date=datetime.datetime.now(), active=True).save()
+
+                messages.success(
+                    request, "Questionnaire & Poll added successfully", extra_tags='alert alert-success alert-dismissible fade show')
+
+                return redirect('polls:list')
+        else:
+            form = QuestionnaireAddForm()
+        context = {
+            'form': form,
+        }
+        return render(request, 'polls/add_questionnaire.html', context)
+    else: 
+        return HttpResponse("Sorry but you don't have permission to do that!")
+
+
+@login_required()
 def polls_add(request):
     if request.user.has_perm('polls.add_poll'):
         if request.method == 'POST':
@@ -77,7 +104,7 @@ def polls_add(request):
             'form': form,
         }
         return render(request, 'polls/add_poll.html', context)
-    else: 
+    else:
         return HttpResponse("Sorry but you don't have permission to do that!")
 
 
