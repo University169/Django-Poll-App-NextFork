@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import RedirectView
 from . import views
 
 urlpatterns = [
@@ -22,4 +23,9 @@ urlpatterns = [
     path('home/', views.home, name='home'),
     path('polls/', include('polls.urls', namespace="polls")),
     path('accounts/', include('accounts.urls', namespace="accounts")),
+]
+
+# Добавил URL соотношения, чтобы перенаправлять запросы с корневового URL, на URL приложения
+urlpatterns += [
+    path('', RedirectView.as_view(url='/polls/list/', permanent=True)),
 ]

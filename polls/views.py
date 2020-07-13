@@ -189,17 +189,22 @@ def poll_detail(request, poll_id):
 @login_required
 def poll_vote(request, poll_id):
     poll = get_object_or_404(Poll, pk=poll_id)
-    choice_id = request.POST.get('choice')
+    # choice_id = request.POST.get('choice')
+    choice_ids = request.POST.getlist('choice')
     if not poll.user_can_vote(request.user):
         messages.error(
             request, "You already voted this poll", extra_tags='alert alert-warning alert-dismissible fade show')
         return redirect("polls:list")
 
-    if choice_id:
-        choice = Choice.objects.get(id=choice_id)
-        vote = Vote(user=request.user, poll=poll, choice=choice)
-        vote.save()
-        print(vote)
+    if len(choice_ids) > 0:
+        # когда чекбоксы, то нужно передавать несколько choice_id
+        # -----------
+        for choice_item in choice_ids:
+            print(f'choice_item равно {choice_item}, тип {type(choice_item)}')
+            choice = Choice.objects.get(id=choice_item)
+            vote = Vote(user=request.user, poll=poll, choice=choice)
+            vote.save()
+            print(f'Проголосовал: {vote}')
         return render(request, 'polls/poll_result.html', {'poll': poll})
     else:
         messages.error(
