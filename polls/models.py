@@ -31,7 +31,7 @@ class Questionnaire(models.Model):
 
 class Poll(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    # questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)
+    questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)
     text = models.TextField()
     pub_date = models.DateTimeField(default=timezone.now)
     active = models.BooleanField(default=True)
